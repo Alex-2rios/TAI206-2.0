@@ -14,7 +14,7 @@ prestamos_db = []
 class Libro(BaseModel):
     id: int = Field(..., gt=0) 
     nombre: str = Field(..., min_length=2, max_length=100) 
-    anio: int = Field(..., gt=1450, le=2026) 
+    año: int = Field(..., gt=1450, le=2026) 
     paginas: int = Field(..., gt=1) 
     estado: Literal["disponible", "prestado"] = "disponible" 
 
