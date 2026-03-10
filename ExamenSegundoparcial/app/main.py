@@ -16,7 +16,6 @@ app = FastAPI(
 
 citas_db = []
 
-
 class CitaBase(BaseModel):
     id: int = Field(..., gt=0, description="Identificador de la cita", example=1)
     nombre_paciente: str = Field(..., min_length=5, description="Nombre del paciente", example="Juan Perez")
@@ -62,4 +61,67 @@ async def crear_cita(cita: CitaBase):
             detail="El paciente ya alcanzó el límite de 3 citas para este día"
         )
 
-  
+    for c in citas_db:
+        if c["id"] == cita.id:
+            raise HTTPException(
+                status_code=400,
+                detail="El ID de esta cita ya existe"
+            )
+
+    citas_db.append(cita.model_dump())
+    return {
+        "mensaje": "Cita creada correctamente",
+        "datos": cita,
+        "status": "201"  
+    }
+
+
+@app.get("/v1/citas/", tags=['CRUD Citas'])
+async def listar_citas(usuarioAuth: str = Depends(verificar_Peticion)):
+    return {
+        "status": "200",
+        "total": len(citas_db),
+        "data": citas_db
+    }
+
+@app.delete("/v1/citas/{id}", tags=['CRUD Citas'])
+async def eliminar_cita(id: int, usuarioAuth: str = Depends(verificar_Peticion)):
+    for idx, c in enumerate(citas_db):
+        if c["id"] == id:
+            del citas_db[idx]
+            return {
+                "mensaje": f"Cita eliminada correctamente por el usuario: {usuarioAuth}",
+                "status": "200"
+            }
+            
+    raise HTTPException(
+        status_code=404,
+        detail="Cita no encontrada"
+    )
+
+@app.get("/v1/citas/{id}", tags=['CRUD Citas'])
+async def consultar_cita(id: int):
+    for cita in citas_db:
+        if cita["id"] == id:
+            return {"status": "200", "datos": cita}
+            
+    raise HTTPException(
+        status_code=404,
+        detail="Cita no encontrada"
+    )
+
+@app.put("/v1/citas/{id}/confirmar", tags=['CRUD Citas'])
+async def confirmar_cita(id: int):
+    for idx, c in enumerate(citas_db):
+        if c["id"] == id:
+            citas_db[idx]["confirmacion"] = True
+            return {
+                "mensaje": "Cita confirmada exitosamente",
+                "datos": citas_db[idx],
+                "status": "200"
+            }
+            
+    raise HTTPException(
+        status_code=404,
+        detail="Cita no encontrada"
+    )
