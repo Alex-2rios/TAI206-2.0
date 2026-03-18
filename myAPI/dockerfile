@@ -1,19 +1,19 @@
 FROM python:3.12-slim
 
-#crear carpeta de trabajo
+# crear carpeta de trabajo
 WORKDIR /app
 
-#Copia de requerimientos
+# Copia de requerimientos
 COPY requirements.txt .
 
-#instalalos
+# instalalos
 RUN pip install --no-cache-dir -r requirements.txt
 
-#Copiar el código del proyecto
+# Copiar el código del proyecto
 COPY ./app ./app
 
-#Exponer el puerto
+# Exponer el puerto
 EXPOSE 5000
 
-#Comando para ejecutar FASTAPI
+# Comando para ejecutar FASTAPI
 CMD ["uvicorn","app.main:app","--host","0.0.0.0","--port","5000","--reload"]
